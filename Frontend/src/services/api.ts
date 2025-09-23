@@ -88,4 +88,17 @@ export const cashApi = {
   addMovement: (registerId: number, data: any) => api.post<ApiResponse<any>>(`/cash-registers/${registerId}/movements`, data),
 };
 
+export async function login(username: string, password: string) {
+  const res = await fetch("/api/auth/login", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ username, password }),
+  });
+  if (!res.ok) {
+    const error = await res.json();
+    throw new Error(error.message || "Error de autenticación");
+  }
+  return await res.json(); // { token, user }
+}
+
 export default api;

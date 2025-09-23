@@ -1,0 +1,246 @@
+// Fuente de datos
+// Nota: provider no admite env(); fije "postgresql" o "sqlite" según corresponda
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model Company {
+  id           BigInt      @id @default(autoincrement())
+  name         String
+  cuit         String?     @unique
+  address      String?
+  contact_info String?
+  created_at   DateTime    @default(now())
+  updated_at   DateTime    @updatedAt
+  deleted_at   DateTime?
+
+  settings     CompanySettings?
+  users        User[]
+  clients      Client[]
+  suppliers    Supplier[]
+  products     Product[]
+  stockMoves   StockMovement[]
+  sales        Sale[]
+  invoices     Invoice[]
+  cashRegs     CashRegister[]
+  cashMoves    CashMovement[]
+}
+
+model CompanySettings {
+  id               BigInt   @id @default(autoincrement())
+  company_id       BigInt   @unique
+  enable_invoicing Boolean  @default(true)
+  invoice_series   String   @default("V")
+  default_currency String   @default("ARS")
+  created_at       DateTime @default(now())
+  updated_at       DateTime @updatedAt
+
+  company Company @relation(fields: [company_id], references: [id], onDelete: Cascade)
+}
+
+enum UserRole {
+  superadmin
+  admin
+  supervisor
+  vendedor
+}
+
+model User {
+  id         BigInt    @id @default(autoincrement())
+  company_id BigInt?
+  username   String    @unique
+  password   String
+  role       UserRole
+  created_at DateTime  @default(now())
+  updated_at DateTime  @updatedAt
+  deleted_at DateTime?
+
+  company Company? @relation(fields: [company_id], references: [id])
+  sales   Sale[]
+  opens   CashRegister[]
+  stocks  StockMovement[] @relation("StockCreatedBy")
+  moves   CashMovement[]
+}
+
+model Client {
+  id           BigInt    @id @default(autoincrement())
+  company_id   BigInt
+  name         String
+  contact_info String?
+  balance      Decimal   @default(0)
+  created_at   DateTime  @default(now())
+  updated_at   DateTime  @updatedAt
+  deleted_at   DateTime?
+
+  company Company @relation(fields: [company_id], references: [id])
+  sales   Sale[]
+}
+
+model Supplier {
+  id           BigInt    @id @default(autoincrement())
+  company_id   BigInt
+  name         String
+  contact_info String?
+  created_at   DateTime  @default(now())
+  updated_at   DateTime  @updatedAt
+  deleted_at   DateTime?
+
+  company Company @relation(fields: [company_id], references: [id])
+}
+
+model Product {
+  id          BigInt         @id @default(autoincrement())
+  company_id  BigInt
+  name        String
+  description String?
+  price       Decimal
+  stock       Int
+  created_at  DateTime       @default(now())
+  updated_at  DateTime       @updatedAt
+  deleted_at  DateTime?
+
+  company Company           @relation(fields: [company_id], references: [id])
+  prices  ProductPrice[]
+  items   SaleItem[]
+  moves   StockMovement[]
+}
+
+model ProductPrice {
+  id         BigInt   @id @default(autoincrement())
+  product_id BigInt
+  price      Decimal
+  valid_from DateTime @default(now())
+  valid_to   DateTime?
+
+  product Product @relation(fields: [product_id], references: [id])
+}
+
+enum MovementType {
+  in
+  out
+  adjustment
+}
+
+model StockMovement {
+  id            BigInt       @id @default(autoincrement())
+  company_id    BigInt
+  product_id    BigInt
+  quantity      Int
+  movement_type MovementType
+  note          String?
+  created_at    DateTime     @default(now())
+  created_by    BigInt?
+
+  company Company @relation(fields: [company_id], references: [id])
+  product Product @relation(fields: [product_id], references: [id])
+  user    User?   @relation(name: "StockCreatedBy", fields: [created_by], references: [id])
+}
+
+enum PaymentMethod {
+  cash
+  card
+  transfer
+  mixed
+}
+
+enum SaleStatus {
+  pending
+  completed
+  cancelled
+}
+
+model Sale {
+  id             BigInt       @id @default(autoincrement())
+  company_id     BigInt
+  user_id        BigInt?
+  client_id      BigInt?
+  total_amount   Decimal
+  payment_method PaymentMethod
+  status         SaleStatus
+  invoiced       Boolean      @default(false)
+  created_at     DateTime     @default(now())
+  updated_at     DateTime     @updatedAt
+  deleted_at     DateTime?
+
+  company Company @relation(fields: [company_id], references: [id])
+  user    User?   @relation(fields: [user_id], references: [id])
+  client  Client? @relation(fields: [client_id], references: [id])
+  items   SaleItem[]
+  invoice Invoice?
+}
+
+model SaleItem {
+  id         BigInt  @id @default(autoincrement())
+  sale_id    BigInt
+  product_id BigInt
+  quantity   Int
+  price      Decimal
+
+  sale    Sale    @relation(fields: [sale_id], references: [id])
+  product Product @relation(fields: [product_id], references: [id])
+}
+
+enum InvoiceStatus {
+  pending
+  approved
+  rejected
+}
+
+model Invoice {
+  id         BigInt        @id @default(autoincrement())
+  company_id BigInt
+  sale_id    BigInt @unique
+  cae        String?
+  status     InvoiceStatus
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  company Company @relation(fields: [company_id], references: [id])
+  sale    Sale    @relation(fields: [sale_id], references: [id])
+}
+
+enum CashRegisterStatus {
+  open
+  closed
+}
+
+model CashRegister {
+  id               BigInt             @id @default(autoincrement())
+  company_id       BigInt
+  user_id          BigInt
+  opening_balance  Decimal
+  closing_balance  Decimal?
+  status           CashRegisterStatus
+  created_at       DateTime @default(now())
+  updated_at       DateTime @updatedAt
+
+  company Company @relation(fields: [company_id], references: [id])
+  user    User    @relation(fields: [user_id], references: [id])
+  moves   CashMovement[]
+}
+
+enum CashMovementType {
+  income
+  expense
+  adjustment
+}
+
+model CashMovement {
+  id              BigInt            @id @default(autoincrement())
+  company_id      BigInt
+  cash_register_id BigInt
+  user_id         BigInt
+  amount          Decimal
+  movement_type   CashMovementType
+  concept         String?
+  created_at      DateTime @default(now())
+
+  company  Company      @relation(fields: [company_id], references: [id])
+  register CashRegister @relation(fields: [cash_register_id], references: [id])
+  user     User         @relation(fields: [user_id], references: [id])
+}

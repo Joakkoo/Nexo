@@ -1,88 +1,59 @@
-import React, { createContext, useContext, useEffect, useState } from 'react';
-import type { User } from '../types';
+import React, { createContext, useState, useEffect, useContext } from "react";
+
+interface User {
+  id: number;
+  username: string;
+  role: string;
+  // ...otros campos
+}
 
 interface AuthContextType {
   user: User | null;
-  login: (username: string, password: string) => Promise<void>;
+  token: string | null;
+  login: (token: string, user: User) => void;
   logout: () => void;
-  loading: boolean;
 }
 
-const AuthContext = createContext<AuthContextType | undefined>(undefined);
+export const AuthContext = createContext<AuthContextType>({
+  user: null,
+  token: null,
+  login: () => {},
+  logout: () => {},
+});
 
-export const useAuth = () => {
-  const context = useContext(AuthContext);
-  if (context === undefined) {
-    throw new Error('useAuth must be used within an AuthProvider');
-  }
-  return context;
-};
-
-interface AuthProviderProps {
-  children: React.ReactNode;
-}
-
-export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
+export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [token, setToken] = useState<string | null>(null);
 
   useEffect(() => {
-    // Verificar si hay un usuario guardado en localStorage
-    const savedUser = localStorage.getItem('user');
-    const token = localStorage.getItem('token');
-    
-    if (savedUser && token) {
-      try {
-        setUser(JSON.parse(savedUser));
-      } catch (error) {
-        console.error('Error parsing saved user:', error);
-        localStorage.removeItem('user');
-        localStorage.removeItem('token');
-      }
+    // Recuperar de localStorage si existe
+    const savedToken = localStorage.getItem("token");
+    const savedUser = localStorage.getItem("user");
+    if (savedToken && savedUser) {
+      setToken(savedToken);
+      setUser(JSON.parse(savedUser));
     }
-    
-    setLoading(false);
   }, []);
 
-  const login = async (username: string, password: string) => {
-    try {
-      // Por ahora, simulación de login
-      // En el futuro, esto hará una llamada real a la API
-      const mockUser: User = {
-        id: 1,
-        username,
-        role: 'admin',
-        company_id: 1,
-      };
-      
-      const mockToken = 'mock-token-' + Date.now();
-      
-      localStorage.setItem('user', JSON.stringify(mockUser));
-      localStorage.setItem('token', mockToken);
-      
-      setUser(mockUser);
-    } catch (error) {
-      console.error('Login error:', error);
-      throw error;
-    }
+  const login = (token: string, user: User) => {
+    setToken(token);
+    setUser(user);
+    localStorage.setItem("token", token);
+    localStorage.setItem("user", JSON.stringify(user));
   };
 
   const logout = () => {
-    localStorage.removeItem('user');
-    localStorage.removeItem('token');
+    setToken(null);
     setUser(null);
-  };
-
-  const value: AuthContextType = {
-    user,
-    login,
-    logout,
-    loading,
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
   };
 
   return (
-    <AuthContext.Provider value={value}>
+    <AuthContext.Provider value={{ user, token, login, logout }}>
       {children}
     </AuthContext.Provider>
   );
 };
+
+export const useAuth = () => useContext(AuthContext);
