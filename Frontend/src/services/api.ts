@@ -26,16 +26,15 @@ api.interceptors.request.use(
 
 // Interceptor para manejar respuestas
 api.interceptors.response.use(
-  (response) => {
-    return response;
-  },
+  (response) => response,
   (error) => {
-    if (error.response?.status === 401) {
-      // Token expirado o inválido
-      localStorage.removeItem('token');
-      localStorage.removeItem('user');
-      window.location.href = '/login';
+    // Si no hay token, ahí podrías hacer algo puntual
+    const token = localStorage.getItem("token");
+    if (!token) {
+      console.warn("No hay token, redirigiendo al login");
+      // window.location.href = "/login"; // opcional
     }
+
     return Promise.reject(error);
   }
 );

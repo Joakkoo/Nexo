@@ -3,19 +3,14 @@
 import * as React from "react"
 import {
   BookOpen,
-  Bot,
   Command,
-  Frame,
   LifeBuoy,
-  Map,
   PieChart,
-  Send,
   Settings2,
   SquareTerminal,
 } from "lucide-react"
 
 import { NavMain } from "../components/nav-main"
-import { NavProjects } from "../components/nav-projects"
 import { NavSecondary } from "../components/nav-secondary"
 import { NavUser } from "../components/nav-user"
 import {
@@ -36,118 +31,42 @@ const data = {
   },
   navMain: [
     {
-      title: "Playground",
+      title: "Dashboard",
       url: "#",
-      icon: SquareTerminal,
+      icon: PieChart,
       isActive: true,
-      items: [
-        {
-          title: "History",
-          url: "#",
-        },
-        {
-          title: "Starred",
-          url: "#",
-        },
-        {
-          title: "Settings",
-          url: "#",
-        },
-      ],
     },
     {
-      title: "Models",
-      url: "#",
-      icon: Bot,
+      title: "Empresas",
+      url: "/superadmin/empresas",
+      icon: SquareTerminal,
+      isActive: false,
       items: [
-        {
-          title: "Genesis",
-          url: "#",
-        },
-        {
-          title: "Explorer",
-          url: "#",
-        },
-        {
-          title: "Quantum",
-          url: "#",
-        },
-      ],
+        { title: "Listado", url: "/superadmin/empresas" },
+        { title: "Crear", url: "/superadmin/empresas/nueva" }
+      ]
     },
     {
-      title: "Documentation",
-      url: "#",
-      icon: BookOpen,
-      items: [
-        {
-          title: "Introduction",
-          url: "#",
-        },
-        {
-          title: "Get Started",
-          url: "#",
-        },
-        {
-          title: "Tutorials",
-          url: "#",
-        },
-        {
-          title: "Changelog",
-          url: "#",
-        },
-      ],
-    },
-    {
-      title: "Settings",
-      url: "#",
+      title: "Configuración",
+      url: "/superadmin/configuracion",
       icon: Settings2,
       items: [
-        {
-          title: "General",
-          url: "#",
-        },
-        {
-          title: "Team",
-          url: "#",
-        },
-        {
-          title: "Billing",
-          url: "#",
-        },
-        {
-          title: "Limits",
-          url: "#",
-        },
-      ],
+        { title: "Planes", url: "/superadmin/configuracion/planes" },
+        { title: "Integraciones", url: "/superadmin/configuracion/integraciones" },
+        { title: "General", url: "/superadmin/configuracion/general" }
+      ]
+    },
+    {
+      title: "Auditoría",
+      url: "/superadmin/auditoria",
+      icon: BookOpen,
     },
   ],
   navSecondary: [
     {
-      title: "Support",
+      title: "Soporte",
       url: "#",
       icon: LifeBuoy,
-    },
-    {
-      title: "Feedback",
-      url: "#",
-      icon: Send,
-    },
-  ],
-  projects: [
-    {
-      name: "Design Engineering",
-      url: "#",
-      icon: Frame,
-    },
-    {
-      name: "Sales & Marketing",
-      url: "#",
-      icon: PieChart,
-    },
-    {
-      name: "Travel",
-      url: "#",
-      icon: Map,
     },
   ],
 }
@@ -155,7 +74,7 @@ const data = {
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   return (
     <Sidebar
-      className="top-[--header-height] !h-[calc(100svh-var(--header-height))]"
+      className="top-12 !h-[calc(100svh-var(12))]"
       {...props}
     >
       <SidebarHeader>
@@ -177,7 +96,6 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       </SidebarHeader>
       <SidebarContent>
         <NavMain items={data.navMain} />
-        <NavProjects projects={data.projects} />
         <NavSecondary items={data.navSecondary} className="mt-auto" />
       </SidebarContent>
       <SidebarFooter>

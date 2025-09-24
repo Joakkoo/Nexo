@@ -11,4 +11,5 @@ export default router;
 export const mountRoutes = (app: import('express').Express) => {
   app.use('/api', router);
   app.use('/api/auth', require('../routes/auth').default);
+  app.use('/api/companies', require('../routes/company').default);
 };

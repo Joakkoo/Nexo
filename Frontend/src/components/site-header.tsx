@@ -1,7 +1,7 @@
 "use client"
 
+import * as React from "react"
 import { SidebarIcon } from "lucide-react"
-
 import { SearchForm } from "../components/search-form"
 import {
   Breadcrumb,
@@ -15,12 +15,18 @@ import { Button } from "../components/ui/button"
 import { Separator } from "../components/ui/separator"
 import { useSidebar } from "../components/ui/sidebar"
 
-export function SiteHeader() {
+type BreadcrumbLink = { title: string; href?: string }
+
+interface SiteHeaderProps {
+  breadcrumbs?: BreadcrumbLink[]
+}
+
+export function SiteHeader({ breadcrumbs }: SiteHeaderProps) {
   const { toggleSidebar } = useSidebar()
 
   return (
     <header className="flex sticky top-0 z-50 w-full items-center border-b bg-background">
-      <div className="flex h-[--header-height] w-full items-center gap-2 px-4">
+      <div className="flex h-12 w-full items-center gap-2 px-4">
         <Button
           className="h-8 w-8"
           variant="ghost"
@@ -30,19 +36,25 @@ export function SiteHeader() {
           <SidebarIcon />
         </Button>
         <Separator orientation="vertical" className="mr-2 h-4" />
-        <Breadcrumb className="hidden sm:block">
-          <BreadcrumbList>
-            <BreadcrumbItem>
-              <BreadcrumbLink href="#">
-                Building Your Application
-              </BreadcrumbLink>
-            </BreadcrumbItem>
-            <BreadcrumbSeparator />
-            <BreadcrumbItem>
-              <BreadcrumbPage>Data Fetching</BreadcrumbPage>
-            </BreadcrumbItem>
-          </BreadcrumbList>
-        </Breadcrumb>
+        {breadcrumbs && (
+          <Breadcrumb className="hidden sm:block">
+            <BreadcrumbList>
+              {breadcrumbs.map((crumb, i) => (
+                <React.Fragment key={i}>
+                  <BreadcrumbItem>
+                    {crumb.href ? (
+                      <BreadcrumbLink href={crumb.href}>{crumb.title}</BreadcrumbLink>
+                    ) : (
+                      <BreadcrumbPage>{crumb.title}</BreadcrumbPage>
+                    )}
+                  </BreadcrumbItem>
+                  {i < breadcrumbs.length - 1 && <BreadcrumbSeparator />}
+                </React.Fragment>
+              ))}
+            </BreadcrumbList>
+
+          </Breadcrumb>
+        )}            
         <SearchForm className="w-full sm:ml-auto sm:w-auto" />
       </div>
     </header>
