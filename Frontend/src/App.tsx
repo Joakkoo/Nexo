@@ -5,6 +5,7 @@ import LoginPage from "./pages/auth/Login";
 import AdminPage from "./pages/admin/dashboard/page";
 import NuevaEmpresa from "./pages/admin/dashboard/registerCompany";
 import PrivateRoute from "./components/PrivateRoute";
+import Listado from "./pages/admin/dashboard/listCompany";
 
 const AppContent: React.FC = () => {
   return (
@@ -27,6 +28,14 @@ const AppContent: React.FC = () => {
           element={
             <PrivateRoute>
               <NuevaEmpresa />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/superadmin/empresas/listado"
+          element={
+            <PrivateRoute>
+              <Listado />
             </PrivateRoute>
           }
         />

@@ -40,9 +40,9 @@ const data = {
       title: "Empresas",
       url: "/superadmin/empresas",
       icon: SquareTerminal,
-      isActive: false,
+      isActive: true,
       items: [
-        { title: "Listado", url: "/superadmin/empresas" },
+        { title: "Listado", url: "/superadmin/empresas/listado" },
         { title: "Crear", url: "/superadmin/empresas/nueva" }
       ]
     },
@@ -50,6 +50,7 @@ const data = {
       title: "Configuración",
       url: "/superadmin/configuracion",
       icon: Settings2,
+      isActive: true,
       items: [
         { title: "Planes", url: "/superadmin/configuracion/planes" },
         { title: "Integraciones", url: "/superadmin/configuracion/integraciones" },
